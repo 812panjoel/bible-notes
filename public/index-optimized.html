@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圣经笔记 - 诗篇分享 (优化版)</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- 引入字体图标 - 使用本地版本替代CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* 为防止Font Awesome加载失败，添加基本图标备用样式 */
+        .icon-fallback {
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+        
+        /* 搜索结果样式 */
+        .search-results {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .results-list {
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        [data-theme="dark"] .result-item {
+            background-color: rgba(40, 40, 40, 0.5);
+        }
+        
+        .result-item h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .result-context {
+            margin: 10px 0;
+            font-style: italic;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        [data-theme="dark"] .result-context {
+            color: #bbb;
+        }
+        
+        .view-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .view-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* 笔记备注 */
+        .note {
+            font-size: 0.9em;
+            color: #777;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        [data-theme="dark"] .note {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>诗篇分享</h2>
+                <button id="close-sidebar" class="close-btn mobile-only"><i class="fas fa-times"></i><span class="icon-fallback">✕</span></button>
+            </div>
+            <div class="sidebar-content">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="搜索笔记...">
+                    <button id="search-btn"><i class="fas fa-search"></i><span class="icon-fallback">🔍</span></button>
+                </div>
+                <nav class="table-of-contents" id="toc">
+                    <!-- 目录内容将通过JavaScript动态生成 -->
+                    <div class="loading">加载目录中...</div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="main-header">
+                <button id="toggle-sidebar" class="menu-btn mobile-only"><i class="fas fa-bars"></i><span class="icon-fallback">≡</span></button>
+                <h1 id="current-title">圣经笔记</h1>
+                <div class="header-actions">
+                    <button id="font-size-increase"><i class="fas fa-plus"></i><span class="icon-fallback">+</span></button>
+                    <button id="font-size-decrease"><i class="fas fa-minus"></i><span class="icon-fallback">-</span></button>
+                    <button id="toggle-theme"><i class="fas fa-moon"></i><span class="icon-fallback">☾</span></button>
+                </div>
+            </header>
+            <div class="content-container" id="content">
+                <!-- 内容将通过JavaScript动态加载 -->
+                <div class="welcome-message">
+                    <h2>欢迎阅读圣经诗篇笔记</h2>
+                    <p>正在加载内容，请稍候...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 加载MathJax以处理数学公式 - 本地降级版本 -->
+    <script>
+        // 检测MathJax是否可用，如果不可用，显示提示但不阻止应用工作
+        window.addEventListener('error', function(e) {
+            if (e.target.src && e.target.src.includes('mathjax')) {
+                console.warn('MathJax加载失败，数学公式可能无法正确显示');
+                e.preventDefault(); // 防止错误传播
+            }
+        }, true);
+        
+        // 基本MathJax配置
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            options: {
+                enableMenu: false // 禁用右键菜单以减少依赖
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- 应用脚本 - 优化版使用JSON数据 -->
+    <script src="js/parser.js"></script>
+    <script src="js/app-json.js"></script>
+</body>
+</html> 
