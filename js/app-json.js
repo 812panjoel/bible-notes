@@ -125,6 +125,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
+        // 添加主内容区域点击事件，在移动设备上点击内容区域时隐藏侧边栏
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.addEventListener('click', (e) => {
+                // 仅在移动端和侧边栏可见时处理
+                if (window.innerWidth <= 768 && !sidebar.classList.contains('hidden')) {
+                    // 确保点击不是来自侧边栏或侧边栏按钮
+                    if (!e.target.closest('#sidebar') && !e.target.closest('#toggle-sidebar')) {
+                        sidebar.classList.add('hidden');
+                        isSidebarHidden = true;
+                        localStorage.setItem('sidebarHidden', 'true');
+                    }
+                }
+            });
+        }
+        
         // 字体大小调整
         fontSizeIncreaseBtn.addEventListener('click', () => {
             if (currentFontSize < 24) {
@@ -195,6 +211,23 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 移除 \hspace{0.6cm} 和其他类似的 LaTeX 空格命令
         cleaned = cleaned.replace(/\\hspace\{\d+\.?\d*cm\}/g, ' ');
+        
+        // 处理数字列表前的序号，确保它们能正确转换为HTML有序列表
+        cleaned = cleaned.replace(/(\d+)\.\s*([^\n]+)/g, function(match, number, content) {
+            // 如果已经在ol标签中，就不处理
+            if (match.indexOf('<li>') > -1) return match;
+            return `<ol start="${number}" class="list-decimal pl-8 my-2"><li class="ml-4">${content.trim()}</li></ol>`;
+        });
+        
+        // 处理"生活应用："等标题后的序号列表
+        cleaned = cleaned.replace(/([\u4e00-\u9fa5]+[：:])[\s\n]*(\d+)\.\s*([^\n]+)/g, function(match, title, number, content) {
+            return `${title}<ol start="${number}" class="list-decimal pl-8 my-2"><li class="ml-4">${content.trim()}</li></ol>`;
+        });
+        
+        // 处理有序列表中的后续项
+        cleaned = cleaned.replace(/<\/ol>[\s\n]*(\d+)\.\s*([^\n]+)/g, function(match, number, content) {
+            return `<li class="ml-4">${content.trim()}</li></ol>`;
+        });
         
         // 处理 LaTeX enumerate 环境
         cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, function(match, p1) {
@@ -657,9 +690,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // 在移动视图中，如果侧边栏可见，则隐藏它
-        if (window.innerWidth <= 768 && !sidebar.classList.contains('hidden')) {
+        // 在移动视图中，加载内容时始终隐藏侧边栏，提供更好的阅读体验
+        if (window.innerWidth <= 768) {
             sidebar.classList.add('hidden');
+            isSidebarHidden = true;
+            localStorage.setItem('sidebarHidden', 'true');
         }
         
         // 重新初始化MathJax以处理新内容中的数学公式
