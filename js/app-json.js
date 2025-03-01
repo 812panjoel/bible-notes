@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM元素
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar');
-    const collapseSidebarBtn = document.getElementById('collapse-sidebar');
     const toc = document.getElementById('toc');
     const contentContainer = document.getElementById('content');
     const currentTitle = document.getElementById('current-title');
@@ -26,13 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     let isSidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
     
-    // 初始化侧边栏状态
+    // 初始化侧边栏状态 - 确保在部署环境中侧边栏默认可见
     if (isSidebarCollapsed) {
         sidebar.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
     }
     
     if (isSidebarHidden) {
         sidebar.classList.add('hidden');
+    } else {
+        sidebar.classList.remove('hidden'); // 确保侧边栏默认可见
     }
     
     // 处理字体大小
@@ -50,33 +53,77 @@ document.addEventListener('DOMContentLoaded', () => {
     // 加载JSON数据
     loadBibleData();
     
+    // 添加window load事件，确保在页面完全加载后正确显示侧边栏
+    window.addEventListener('load', function() {
+        console.log('Window loaded, ensuring sidebar visibility');
+        
+        // 确保侧边栏正确显示
+        setTimeout(() => {
+            // 重置侧边栏状态
+            if (sidebar) {
+                // 先根据localStorage中的状态设置侧边栏
+                const storedHidden = localStorage.getItem('sidebarHidden') === 'true';
+                const storedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                
+                // 更新应用状态
+                isSidebarHidden = storedHidden;
+                isSidebarCollapsed = storedCollapsed;
+                
+                // 应用类名
+                if (isSidebarHidden) {
+                    sidebar.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('hidden');
+                    
+                    // 只有当侧边栏不隐藏时，才应用折叠状态
+                    if (isSidebarCollapsed) {
+                        sidebar.classList.add('collapsed');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                    }
+                }
+                
+                // 强制重绘以确保样式正确应用
+                sidebar.style.display = 'none';
+                setTimeout(() => {
+                    sidebar.style.display = '';
+                }, 10);
+            }
+        }, 300);
+    });
+    
     /**
      * 初始化事件监听器
      */
     function initEventListeners() {
-        // 侧边栏显示/隐藏切换
-        toggleSidebarBtn.addEventListener('click', () => {
-            // 切换侧边栏的可见性
-            sidebar.classList.toggle('hidden');
-            // 更新状态并保存到localStorage
-            isSidebarHidden = sidebar.classList.contains('hidden');
-            localStorage.setItem('sidebarHidden', isSidebarHidden);
-            
-            // 如果侧边栏已折叠状态，展开它
-            if (sidebar.classList.contains('collapsed')) {
-                sidebar.classList.remove('collapsed');
-                isSidebarCollapsed = false;
-                localStorage.setItem('sidebarCollapsed', 'false');
-            }
-        });
-        
-        // 侧边栏折叠/展开 - 合并为一个按钮
-        collapseSidebarBtn.addEventListener('click', () => {
-            // 切换折叠状态
-            isSidebarCollapsed = !isSidebarCollapsed;
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
-        });
+        // 侧边栏显示/隐藏切换 - 更新保证在部署环境中正常工作
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.addEventListener('click', () => {
+                console.log('Toggle sidebar clicked'); // 调试日志
+                
+                // 先检查侧边栏是否已隐藏
+                const isHidden = sidebar.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // 如果侧边栏已隐藏，显示它
+                    sidebar.classList.remove('hidden');
+                    isSidebarHidden = false;
+                    localStorage.setItem('sidebarHidden', 'false');
+                    
+                    // 如果侧边栏之前是折叠状态，保持折叠状态
+                    if (isSidebarCollapsed) {
+                        sidebar.classList.add('collapsed');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                    }
+                } else {
+                    // 如果侧边栏已显示，则隐藏它
+                    sidebar.classList.add('hidden');
+                    isSidebarHidden = true;
+                    localStorage.setItem('sidebarHidden', 'true');
+                }
+            });
+        }
         
         // 字体大小调整
         fontSizeIncreaseBtn.addEventListener('click', () => {

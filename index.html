@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>圣经笔记 - 诗篇分享</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- 使用本地字体图标资源替代CDN -->
+    <!-- 使用更可靠的CDN替代原来的CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- 添加Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -39,10 +39,44 @@
         }
     }, true);
     </script>
+    
+    <!-- 确保在Cloudflare Pages上初始化侧边栏 -->
+    <script>
+    window.addEventListener('DOMContentLoaded', function() {
+        console.log('初始化侧边栏状态');
+        
+        // 确保侧边栏在部署环境中可见
+        setTimeout(function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
+            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            
+            if (sidebar) {
+                // 默认移除隐藏状态，确保侧边栏可见
+                if (!sidebarHidden) {
+                    sidebar.classList.remove('hidden');
+                }
+                
+                // 设置折叠状态
+                if (sidebarCollapsed) {
+                    sidebar.classList.add('collapsed');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        }, 200);
+    });
+    </script>
+    
     <style>
         /* 全局样式 */
         * {
             font-family: 'KaiTi', '楷体', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        /* 为Font Awesome图标特别设置字体 */
+        .fa, .fas, .far, .fal, .fab {
+            font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands" !important;
         }
         
         /* 更改主题色为淡蓝色 */
@@ -108,7 +142,7 @@
             border-radius: 12px;
         }
         
-        /* 侧边栏样式 */
+        /* 侧边栏样式 - 确保默认可见 */
         .sidebar {
             background-image: linear-gradient(135deg, #3a7bd5, #00d2ff);
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
@@ -116,6 +150,8 @@
             border-radius: 0 20px 20px 0;
             overflow: hidden;
             transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
+            /* 确保侧边栏默认可见 */
+            transform: translateX(0);
         }
         
         /* 侧边栏隐藏状态 */
@@ -132,10 +168,7 @@
             outline: none; /* 移除轮廓 */
         }
         
-        .sidebar.collapsed .sidebar-toggle-btn {
-            margin: 12px auto;
-        }
-        
+        /* 修改折叠状态下的样式 */
         .sidebar.collapsed .sidebar-content,
         .sidebar.collapsed .sidebar-header h2,
         .sidebar.collapsed .sidebar-header .icon-text {
@@ -167,34 +200,27 @@
             background: rgba(255, 255, 255, 0.5);
         }
         
-        /* 修改侧边栏折叠/展开按钮布局 */
-        .sidebar-toggle-btn {
+        /* 增强顶部toggle-sidebar按钮样式 */
+        #toggle-sidebar {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
             border-radius: 50%;
             transition: all 0.3s;
+            background-color: rgba(91, 155, 213, 0.1);
         }
         
-        .sidebar-toggle-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
+        #toggle-sidebar:hover {
+            background-color: rgba(91, 155, 213, 0.2);
+            transform: scale(1.05);
         }
         
-        /* 折叠状态下按钮图标旋转 */
-        .sidebar.collapsed .sidebar-toggle-btn .fa-chevron-left {
-            transform: rotate(180deg);
-        }
-        
-        .sidebar-actions {
-            display: flex;
-            margin-left: auto;
+        /* 当侧边栏隐藏时，改变图标样式 */
+        .sidebar.hidden ~ .main-content #toggle-sidebar .fa-bars {
+            color: var(--primary-color);
         }
         
         /* 搜索结果样式 */
@@ -633,11 +659,6 @@
                     <i class="fas fa-book text-white text-xl"></i>
                     <h2 class="text-white text-lg">诗篇分享</h2>
                 </div>
-                <div class="sidebar-actions">
-                    <button id="collapse-sidebar" class="sidebar-toggle-btn" title="折叠/展开侧边栏">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
             </div>
             <div class="sidebar-content">
                 <div class="search-container">
@@ -655,8 +676,8 @@
         <main class="main-content flex-1">
             <header class="main-header glass-effect sticky top-0 z-10 shadow-md px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center">
-                    <button id="toggle-sidebar" class="menu-btn focus:outline-none mr-4" title="显示/隐藏侧边栏">
-                        <i class="fas fa-bars text-gray-600"></i>
+                    <button id="toggle-sidebar" class="menu-btn focus:outline-none mr-4 p-2 hover:bg-blue-100 rounded-full transition-all" title="显示/隐藏侧边栏">
+                        <i class="fas fa-bars text-gray-600 text-lg"></i>
                     </button>
                     <h1 id="current-title" class="text-xl font-bold">圣经笔记</h1>
                 </div>
