@@ -24,10 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let bibleData = null; // 存储JSON数据
     let isDarkTheme = localStorage.getItem('theme') === 'dark';
     let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    let isSidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
     
     // 初始化侧边栏状态
     if (isSidebarCollapsed) {
         sidebar.classList.add('collapsed');
+    }
+    
+    if (isSidebarHidden) {
+        sidebar.classList.add('hidden');
     }
     
     // 处理字体大小
@@ -49,9 +54,20 @@ document.addEventListener('DOMContentLoaded', () => {
      * 初始化事件监听器
      */
     function initEventListeners() {
-        // 移动端侧边栏切换
+        // 侧边栏显示/隐藏切换
         toggleSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.add('active');
+            // 切换侧边栏的可见性
+            sidebar.classList.toggle('hidden');
+            // 更新状态并保存到localStorage
+            isSidebarHidden = sidebar.classList.contains('hidden');
+            localStorage.setItem('sidebarHidden', isSidebarHidden);
+            
+            // 如果侧边栏已折叠状态，展开它
+            if (sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                isSidebarCollapsed = false;
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
         });
         
         // 侧边栏折叠/展开 - 合并为一个按钮
@@ -132,6 +148,32 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 移除 \hspace{0.6cm} 和其他类似的 LaTeX 空格命令
         cleaned = cleaned.replace(/\\hspace\{\d+\.?\d*cm\}/g, ' ');
+        
+        // 处理 LaTeX enumerate 环境
+        cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, function(match, p1) {
+            // 将enumerate环境内的内容按项分割
+            let items = p1.split(/\\item\s+/).filter(item => item.trim().length > 0);
+            
+            if (items.length === 0) return '';
+            
+            // 创建HTML有序列表
+            return '<ol class="list-decimal pl-8 my-4 space-y-2">' + 
+                items.map(item => `<li class="ml-4">${item.trim()}</li>`).join('') + 
+                '</ol>';
+        });
+        
+        // 处理 LaTeX itemize 环境
+        cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, function(match, p1) {
+            // 将itemize环境内的内容按项分割
+            let items = p1.split(/\\item\s+/).filter(item => item.trim().length > 0);
+            
+            if (items.length === 0) return '';
+            
+            // 创建HTML无序列表
+            return '<ul class="list-disc pl-8 my-4 space-y-2">' + 
+                items.map(item => `<li class="ml-4">${item.trim()}</li>`).join('') + 
+                '</ul>';
+        });
         
         // 移除多余的空行
         cleaned = cleaned.replace(/(<br\s*\/?>){3,}/gi, '<br><br>');
@@ -566,6 +608,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (subsectionLink) {
                 subsectionLink.classList.add('active');
             }
+        }
+        
+        // 在移动视图中，如果侧边栏可见，则隐藏它
+        if (window.innerWidth <= 768 && !sidebar.classList.contains('hidden')) {
+            sidebar.classList.add('hidden');
         }
         
         // 重新初始化MathJax以处理新内容中的数学公式
