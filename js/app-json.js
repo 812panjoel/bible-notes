@@ -212,22 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 移除 \hspace{0.6cm} 和其他类似的 LaTeX 空格命令
         cleaned = cleaned.replace(/\\hspace\{\d+\.?\d*cm\}/g, ' ');
         
-        // 处理数字列表前的序号，确保它们能正确转换为HTML有序列表
-        cleaned = cleaned.replace(/(\d+)\.\s*([^\n]+)/g, function(match, number, content) {
-            // 如果已经在ol标签中，就不处理
-            if (match.indexOf('<li>') > -1) return match;
-            return `<ol start="${number}" class="list-decimal pl-8 my-2"><li class="ml-4">${content.trim()}</li></ol>`;
-        });
-        
-        // 处理"生活应用："等标题后的序号列表
-        cleaned = cleaned.replace(/([\u4e00-\u9fa5]+[：:])[\s\n]*(\d+)\.\s*([^\n]+)/g, function(match, title, number, content) {
-            return `${title}<ol start="${number}" class="list-decimal pl-8 my-2"><li class="ml-4">${content.trim()}</li></ol>`;
-        });
-        
-        // 处理有序列表中的后续项
-        cleaned = cleaned.replace(/<\/ol>[\s\n]*(\d+)\.\s*([^\n]+)/g, function(match, number, content) {
-            return `<li class="ml-4">${content.trim()}</li></ol>`;
-        });
+
         
         // 处理 LaTeX enumerate 环境
         cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, function(match, p1) {
