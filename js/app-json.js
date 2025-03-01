@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 匹配"诗篇第xx篇"或"诗篇 xx"格式的标题
         const match = title.match(/诗篇(?:第)?(\s*\d+)\s*(?:篇)?/i);
         if (match) {
-            return `诗篇/${match[1].trim()}`;
+            return `诗篇第${match[1].trim()}篇`;
         }
         return title;
     }
